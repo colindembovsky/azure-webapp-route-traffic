@@ -18,30 +18,30 @@ export class ActionParameters {
         this._trafficPercentage = parseFloat(core.getInput('traffic-percentage', { required: true }));
     }
 
-    public static getActionParams(endpoint?: IAuthorizer) {
+    static getActionParams(endpoint?: IAuthorizer): ActionParameters {
         if(!this.actionparams) {
-            this.actionparams = new ActionParameters(!!endpoint ? endpoint : undefined);
+            this.actionparams = new ActionParameters(endpoint ? endpoint : undefined);
         }
         return this.actionparams;
     }
 
-    public get endpoint() {
+    get endpoint(): IAuthorizer | undefined {
         return this._endpoint;
     }
 
-    public get resourceGroupName() {
+    get resourceGroupName(): string {
         return this._resourceGroupName;
     }
 
-    public get appName() {
+    get appName(): string {
         return this._appName;
     }
 
-    public get slotName() {
+    get slotName(): string {
         return this._slotName;
     }
 
-    public get trafficPercentage() {
+    get trafficPercentage(): number {
         return this._trafficPercentage;
     }
 }

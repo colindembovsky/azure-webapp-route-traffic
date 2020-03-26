@@ -8,29 +8,28 @@ import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { Router } from './router';
 //import { ValidatorFactory } from './ActionInputValidator/ValidatorFactory';
 
-var prefix = !!process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : "";
+const prefix = process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : "";
 
-async function main() {
-  let isDeploymentSuccess: boolean = true;  
+async function main(): Promise<void> {
+  let isDeploymentSuccess = true;  
 
   try {      
     // Set user agent variable
-    let usrAgentRepo = crypto.createHash('sha256').update(`${process.env.GITHUB_REPOSITORY}`).digest('hex');
-    let actionName = 'WebAppRouteTraffic';
-    let userAgentString = (!!prefix ? `${prefix}+` : '') + `GITHUBACTIONS_${actionName}_${usrAgentRepo}`;
+    const usrAgentRepo = crypto.createHash('sha256').update(`${process.env.GITHUB_REPOSITORY}`).digest('hex');
+    const actionName = 'WebAppRouteTraffic';
+    const userAgentString = `${prefix ? `${prefix}+` : ''}GITHUBACTIONS_${actionName}_${usrAgentRepo}`;
     core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
 
     // Initialize action inputs
-    let endpoint: IAuthorizer = await AuthorizerFactory.getAuthorizer();
+    const endpoint: IAuthorizer = await AuthorizerFactory.getAuthorizer();
     ActionParameters.getActionParams(endpoint);
 
-    var router = new Router();
-
+    const router = new Router();
     await router.applyRoutingRule();
   }
   catch(error) {
     isDeploymentSuccess = false;
-    core.setFailed("Route traffic failed with error: " + error);
+    core.setFailed(`Route traffic failed with error: ${error}`);
   }
   finally {
       // Reset AZURE_HTTP_USER_AGENT

@@ -15,23 +15,23 @@ export class Router {
         this.serviceClient = new ServiceClient(this.actionParams.endpoint!);
     }
 
-    private async getHeaders() {
-        let accessToken = await this.actionParams.endpoint?.getToken();
+    private async getHeaders(): Promise<{}> {
+        const accessToken = await this.actionParams.endpoint?.getToken();
         core.debug("Successfully got token");
 
         return {
-            authorization: 'Bearer '+ accessToken,
+            authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json'
         };
     }
 
-    private async getRequest() {
-        let headers = await this.getHeaders();
+    private async getRequest(): Promise<WebRequest> {
+        const headers = await this.getHeaders();
 
-        let configUrl = `${this.actionParams.endpoint?.baseUrl}subscriptions/${this.actionParams.endpoint?.subscriptionID}/resourceGroups/${this.actionParams.resourceGroupName}/providers/Microsoft.Web/sites/${this.actionParams.appName}/config/web?${azureApiVersion}`;
+        const configUrl = `${this.actionParams.endpoint?.baseUrl}subscriptions/${this.actionParams.endpoint?.subscriptionID}/resourceGroups/${this.actionParams.resourceGroupName}/providers/Microsoft.Web/sites/${this.actionParams.appName}/config/web?${azureApiVersion}`;
         core.debug(`Configuring rule for traffic on ${configUrl}`);
 
-        let configData = {
+        const configData = {
             properties: {
                 experiments: {
                     rampUpRules: [
@@ -44,28 +44,28 @@ export class Router {
                 }
             }
         };
-        let configDataStr = JSON.stringify(configData);
+        const configDataStr = JSON.stringify(configData);
         core.debug(`ConfigData = ${configDataStr}`);
         
-        return <WebRequest> {
+        return {
             method: "post",
             uri: configUrl,
-            headers: headers,
+            headers,
             body: configDataStr
-        }
+        };
     }
 
-    async applyRoutingRule() {
+    async applyRoutingRule(): Promise<void> {
         try {
             core.debug("Routing traffic");
             
-            let request = await this.getRequest();
-            let res = await this.serviceClient.beginRequest(request);
+            const request = await this.getRequest();
+            const res = await this.serviceClient.beginRequest(request);
             if (res.statusCode === 200)
             {
                 try {
-                    var retConfig = JSON.parse(res.body);
-                    var exp = retConfig.properties.experiments.rampUpRules[0];
+                    const retConfig = JSON.parse(res.body);
+                    const exp = retConfig.properties.experiments.rampUpRules[0];
                     core.debug(`Call success: ${JSON.stringify(exp)}`);
                 } catch (e) {
                     core.warning(`Could not deserialize return packet from experiment update: ${e}`);
