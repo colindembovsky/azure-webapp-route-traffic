@@ -1,19 +1,43 @@
-import * as core from '@actions/core'
-import {wait} from './wait'
+import * as core from '@actions/core';
+import * as crypto from "crypto";
 
-async function run(): Promise<void> {
-  try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`)
+import { ActionParameters } from "./actionParameters";
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
+import { AuthorizerFactory } from "azure-actions-webclient/AuthorizerFactory";
+import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
+import { Router } from './router';
+//import { ValidatorFactory } from './ActionInputValidator/ValidatorFactory';
 
-    core.setOutput('time', new Date().toTimeString())
-  } catch (error) {
-    core.setFailed(error.message)
+var prefix = !!process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : "";
+
+async function main() {
+  let isDeploymentSuccess: boolean = true;  
+
+  try {      
+    // Set user agent variable
+    let usrAgentRepo = crypto.createHash('sha256').update(`${process.env.GITHUB_REPOSITORY}`).digest('hex');
+    let actionName = 'WebAppRouteTraffic';
+    let userAgentString = (!!prefix ? `${prefix}+` : '') + `GITHUBACTIONS_${actionName}_${usrAgentRepo}`;
+    core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
+
+    // Initialize action inputs
+    let endpoint: IAuthorizer = await AuthorizerFactory.getAuthorizer();
+    ActionParameters.getActionParams(endpoint);
+
+    var router = new Router();
+
+    await router.applyRoutingRule();
+  }
+  catch(error) {
+    isDeploymentSuccess = false;
+    core.setFailed("Route traffic failed with error: " + error);
+  }
+  finally {
+      // Reset AZURE_HTTP_USER_AGENT
+      core.exportVariable('AZURE_HTTP_USER_AGENT', prefix);
+      
+      core.debug(isDeploymentSuccess ? "Route traffic succeeded" : "Route traffic failed");
   }
 }
 
-run()
+main();

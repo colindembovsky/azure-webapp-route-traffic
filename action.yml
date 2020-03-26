@@ -2,9 +2,18 @@ name: 'Your name here'
 description: 'Provide a description here'
 author: 'Your name or organization here'
 inputs:
-  myInput:              # change this
-    description: 'input description here'
-    default: 'default value if applicable'
+  resource-group:
+    description: 'Name of the resource group containing the web app'
+    required: true
+  app-name:
+    description: 'Name of the web app'
+    required: true
+  slot-name:
+    description: 'Name of the slot to route percentage of traffic to'
+    required: true
+  percentage-traffic:
+    description: 'Percentage of traffic to route to slot'
+    required: true
 runs:
   using: 'node12'
   main: 'dist/index.js'
