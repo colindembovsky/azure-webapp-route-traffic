@@ -43,6 +43,11 @@ export async function main(): Promise<void> {
   }
 }
 
-main();
+core.debug(process.env.TESTACTIONJEST!);
+if (process.env.TESTACTIONJEST && process.env.TESTACTIONJEST === "testing") {
+  core.debug("=== SKIPPING AMBIENT INVOCATION FOR TESTING PURPOSES");
+} else {
+  main();
+}
 
 export default main;

@@ -1,3 +1,5 @@
+process.env.TESTACTIONJEST = "testing";
+
 module.exports = {
   clearMocks: true,
   moduleFileExtensions: ['js', 'ts'],
@@ -8,4 +10,4 @@ module.exports = {
     '^.+\\.ts$': 'ts-jest'
   },
   verbose: true
-}
+};
