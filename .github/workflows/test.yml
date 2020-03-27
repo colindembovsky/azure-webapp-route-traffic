@@ -14,10 +14,25 @@ jobs:
     - run: |
         npm install
         npm run all
+  
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
-    - uses: ./
+
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: 'Test traffic routing'
+      uses: ./
       with: 
-        milliseconds: 1000
+        resource-group: cd-pu2-prod-webapp
+        app-name: cdpartsun2-prod
+        slot-name: blue
+        percentage-traffic: 21
+    
+    - name: Azure logout
+      run: |
+        az logout

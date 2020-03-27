@@ -1,27 +1,52 @@
-import { wait } from '../src/wait';
 import * as process from 'process';
-import * as cp from 'child_process';
-import * as path from 'path';
+import { AuthorizerFactory } from 'azure-actions-webclient/AuthorizerFactory';
+import nock from 'nock';
+import main from '../src/main';
 
-test('throws invalid number', async () => {
-  const input = parseInt('foo', 10);
-  await expect(wait(input)).rejects.toThrow('milliseconds not a number');
-});
+describe('action test suite', () => {
+  beforeAll(async () => {
+    jest.spyOn(AuthorizerFactory, 'getAuthorizer').mockResolvedValue({
+        getToken: (force) => Promise.resolve('BearerToken'),
+        subscriptionID: 'SubscriptionId',
+        baseUrl: 'http://baseUrl/',
+        getCloudEndpointUrl: (name) => '',
+        getCloudSuffixUrl: (suffixName) => '.database.windows.net'
+    });
+  });
 
-test('wait 500 ms', async () => {
-  const start = new Date();
-  await wait(500);
-  const end = new Date();
-  var delta = Math.abs(end.getTime() - start.getTime());
-  expect(delta).toBeGreaterThan(450);
-});
 
-// shows how the runner will run a javascript action with env / stdout protocol
-test('test runs', () => {
-  process.env['INPUT_MILLISECONDS'] = '500';
-  const ip = path.join(__dirname, '..', 'lib', 'main.js');
-  const options: cp.ExecSyncOptions = {
-    env: process.env
-  };
-  console.log(cp.execSync(`node ${ip}`, options).toString());
+  it('should route traffic', async () => {
+    // set inputs
+    process.env['GITHUB_REPOSITORY'] = 'foo/bar';
+
+    process.env['INPUT_RESOURCE-GROUP'] = 'rg-test';
+    process.env['INPUT_APP-NAME'] = 'webapp';
+    process.env['INPUT_SLOT-NAME'] = 'staging';
+    process.env['INPUT_TRAFFIC-PERCENTAGE'] = '20';
+
+    // mock the rest api calls
+    const responseBody = {
+      properties: {
+        experiments: {
+          rampUpRules: [
+            {
+              name: "blue",
+              actionHostName: "myapp-slot.azurewebsites.net",
+              reroutePercentage: 22.345
+            }
+          ]
+        }
+      }
+    };
+    nock('http://baseUrl')
+      .persist()
+      .defaultReplyHeaders({
+        'Content-Type': 'application/json',
+       })
+      .post('/subscriptions/SubscriptionId/resourceGroups/rg-test/providers/Microsoft.Web/sites/webapp/config/web?api-version=2016-08-01')
+      .reply(200, responseBody);
+
+    // run the task
+    await main();
+  });
 });

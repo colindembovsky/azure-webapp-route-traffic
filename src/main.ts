@@ -6,13 +6,10 @@ import { ActionParameters } from './actionParameters';
 import { AuthorizerFactory } from 'azure-actions-webclient/AuthorizerFactory';
 import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { Router } from './router';
-//import { ValidatorFactory } from './ActionInputValidator/ValidatorFactory';
 
-const prefix = process.env.AZURE_HTTP_USER_AGENT
-  ? `${process.env.AZURE_HTTP_USER_AGENT}`
-  : '';
+const prefix = process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : '';
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   let isDeploymentSuccess = true;
 
   try {
@@ -22,9 +19,8 @@ async function main(): Promise<void> {
       .update(`${process.env.GITHUB_REPOSITORY}`)
       .digest('hex');
     const actionName = 'WebAppRouteTraffic';
-    const userAgentString = `${
-      prefix ? `${prefix}+` : ''
-    }GITHUBACTIONS_${actionName}_${usrAgentRepo}`;
+    const pref = prefix ? `${prefix}+` : '';
+    const userAgentString = `${pref}GITHUBACTIONS_${actionName}_${usrAgentRepo}`;
     core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
 
     // Initialize action inputs
@@ -47,3 +43,5 @@ async function main(): Promise<void> {
 }
 
 main();
+
+export default main;

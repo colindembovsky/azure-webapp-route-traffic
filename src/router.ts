@@ -3,6 +3,7 @@ import * as core from '@actions/core';
 import { ActionParameters } from './actionParameters';
 import { ServiceClient } from 'azure-actions-webclient/AzureRestClient';
 import { WebRequest } from 'azure-actions-webclient/WebClient';
+import { createPrivateKey } from 'crypto';
 
 const azureApiVersion = 'api-version=2016-08-01';
 
@@ -27,7 +28,6 @@ export class Router {
 
   private async getRequest(): Promise<WebRequest> {
     const headers = await this.getHeaders();
-
     const configUrl = `${this.actionParams.endpoint?.baseUrl}subscriptions/${this.actionParams.endpoint?.subscriptionID}/resourceGroups/${this.actionParams.resourceGroupName}/providers/Microsoft.Web/sites/${this.actionParams.appName}/config/web?${azureApiVersion}`;
     core.debug(`Configuring rule for traffic on ${configUrl}`);
 
@@ -58,9 +58,10 @@ export class Router {
   async applyRoutingRule(): Promise<void> {
     try {
       core.debug('Routing traffic');
-
+      
       const request = await this.getRequest();
       const res = await this.serviceClient.beginRequest(request);
+      
       if (res.statusCode === 200) {
         try {
           const retConfig = JSON.parse(res.body);
@@ -68,16 +69,16 @@ export class Router {
           core.debug(`Call success: ${JSON.stringify(exp)}`);
         } catch (e) {
           core.warning(
-            `Could not deserialize return packet from experiment update: ${e}`
+            `Could not deserialize return packet from traffic update: ${e}`
           );
         }
 
         core.info(
-          `Successfully configured experiment directing ${this.actionParams.trafficPercentage}% traffic to ${this.actionParams.slotName} on ${this.actionParams.appName}`
+          `Successfully configured traffic directing ${this.actionParams.trafficPercentage}% traffic to ${this.actionParams.slotName} on ${this.actionParams.appName}`
         );
       } else {
         core.error(
-          `Could not configure app settings experiment: [${res.statusCode}] ${res.statusMessage}`
+          `Could not configure traffic: [${res.statusCode}] ${res.statusMessage}`
         );
       }
     } catch (ex) {
