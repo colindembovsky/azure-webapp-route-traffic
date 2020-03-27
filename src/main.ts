@@ -4,7 +4,6 @@ import * as crypto from 'crypto';
 import { ActionParameters } from './actionParameters';
 
 import { AuthorizerFactory } from 'azure-actions-webclient/AuthorizerFactory';
-import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { Router } from './router';
 
 const prefix = process.env.AZURE_HTTP_USER_AGENT
@@ -26,7 +25,7 @@ export async function main(): Promise<void> {
     core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
 
     // Initialize action inputs
-    const endpoint: IAuthorizer = await AuthorizerFactory.getAuthorizer();
+    const endpoint = await AuthorizerFactory.getAuthorizer();
     ActionParameters.getActionParams(endpoint);
 
     const router = new Router();

@@ -24,6 +24,8 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - run: az account get-access-token
 
     - name: 'Test traffic routing'
       uses: ./

@@ -9,8 +9,8 @@ describe('action test suite', () => {
       getToken: force => Promise.resolve('BearerToken'),
       subscriptionID: 'SubscriptionId',
       baseUrl: 'http://baseUrl/',
-      getCloudEndpointUrl: name => '',
-      getCloudSuffixUrl: suffixName => '.database.windows.net'
+      getCloudEndpointUrl: _ => '',
+      getCloudSuffixUrl: _ => ''
     });
   });
 
@@ -29,9 +29,9 @@ describe('action test suite', () => {
         experiments: {
           rampUpRules: [
             {
-              name: 'blue',
-              actionHostName: 'myapp-slot.azurewebsites.net',
-              reroutePercentage: 22.345
+              name: 'staging',
+              actionHostName: 'webapp-staging.azurewebsites.net',
+              reroutePercentage: 20
             }
           ]
         }
