@@ -4,7 +4,7 @@ import nock from 'nock';
 import main from '../src/main';
 
 describe('action test suite', () => {
-  beforeAll(async () => {
+  beforeAll(() => {
     jest.spyOn(AuthorizerFactory, 'getAuthorizer').mockResolvedValue({
       getToken: force => Promise.resolve('BearerToken'),
       subscriptionID: 'SubscriptionId',
