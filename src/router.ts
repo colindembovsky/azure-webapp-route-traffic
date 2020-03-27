@@ -3,7 +3,6 @@ import * as core from '@actions/core';
 import { ActionParameters } from './actionParameters';
 import { ServiceClient } from 'azure-actions-webclient/AzureRestClient';
 import { WebRequest } from 'azure-actions-webclient/WebClient';
-import { createPrivateKey } from 'crypto';
 
 const azureApiVersion = 'api-version=2016-08-01';
 
@@ -58,10 +57,10 @@ export class Router {
   async applyRoutingRule(): Promise<void> {
     try {
       core.debug('Routing traffic');
-      
+
       const request = await this.getRequest();
       const res = await this.serviceClient.beginRequest(request);
-      
+
       if (res.statusCode === 200) {
         try {
           const retConfig = JSON.parse(res.body);

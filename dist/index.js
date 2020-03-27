@@ -1009,10 +1009,10 @@ class Router {
     getHeaders() {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            let accessToken = yield ((_a = this.actionParams.endpoint) === null || _a === void 0 ? void 0 : _a.getToken());
-            core.debug("Successfully got token");
+            const accessToken = yield ((_a = this.actionParams.endpoint) === null || _a === void 0 ? void 0 : _a.getToken());
+            core.debug('Successfully got token');
             return {
-                authorization: 'Bearer ' + accessToken,
+                authorization: `Bearer ${accessToken}`,
                 'Content-Type': 'application/json'
             };
         });
@@ -1020,28 +1020,28 @@ class Router {
     getRequest() {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            let headers = yield this.getHeaders();
-            let configUrl = `${(_a = this.actionParams.endpoint) === null || _a === void 0 ? void 0 : _a.baseUrl}subscriptions/${(_b = this.actionParams.endpoint) === null || _b === void 0 ? void 0 : _b.subscriptionID}/resourceGroups/${this.actionParams.resourceGroupName}/providers/Microsoft.Web/sites/${this.actionParams.appName}/config/web?${azureApiVersion}`;
+            const headers = yield this.getHeaders();
+            const configUrl = `${(_a = this.actionParams.endpoint) === null || _a === void 0 ? void 0 : _a.baseUrl}subscriptions/${(_b = this.actionParams.endpoint) === null || _b === void 0 ? void 0 : _b.subscriptionID}/resourceGroups/${this.actionParams.resourceGroupName}/providers/Microsoft.Web/sites/${this.actionParams.appName}/config/web?${azureApiVersion}`;
             core.debug(`Configuring rule for traffic on ${configUrl}`);
-            let configData = {
+            const configData = {
                 properties: {
                     experiments: {
                         rampUpRules: [
                             {
                                 name: this.actionParams.slotName,
                                 actionHostName: `${this.actionParams.appName}-${this.actionParams.slotName}.azurewebsites.net`,
-                                reroutePercentage: this.actionParams.trafficPercentage,
+                                reroutePercentage: this.actionParams.trafficPercentage
                             }
                         ]
                     }
                 }
             };
-            let configDataStr = JSON.stringify(configData);
+            const configDataStr = JSON.stringify(configData);
             core.debug(`ConfigData = ${configDataStr}`);
             return {
-                method: "post",
+                method: 'post',
                 uri: configUrl,
-                headers: headers,
+                headers,
                 body: configDataStr
             };
         });
@@ -1049,22 +1049,22 @@ class Router {
     applyRoutingRule() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                core.debug("Routing traffic");
-                let request = yield this.getRequest();
-                let res = yield this.serviceClient.beginRequest(request);
+                core.debug('Routing traffic');
+                const request = yield this.getRequest();
+                const res = yield this.serviceClient.beginRequest(request);
                 if (res.statusCode === 200) {
                     try {
-                        var retConfig = JSON.parse(res.body);
-                        var exp = retConfig.properties.experiments.rampUpRules[0];
+                        const retConfig = JSON.parse(res.body);
+                        const exp = retConfig.properties.experiments.rampUpRules[0];
                         core.debug(`Call success: ${JSON.stringify(exp)}`);
                     }
                     catch (e) {
-                        core.warning(`Could not deserialize return packet from experiment update: ${e}`);
+                        core.warning(`Could not deserialize return packet from traffic update: ${e}`);
                     }
-                    core.info(`Successfully configured experiment directing ${this.actionParams.trafficPercentage}% traffic to ${this.actionParams.slotName} on ${this.actionParams.appName}`);
+                    core.info(`Successfully configured traffic directing ${this.actionParams.trafficPercentage}% traffic to ${this.actionParams.slotName} on ${this.actionParams.appName}`);
                 }
                 else {
-                    core.error(`Could not configure app settings experiment: [${res.statusCode}] ${res.statusMessage}`);
+                    core.error(`Could not configure traffic: [${res.statusCode}] ${res.statusMessage}`);
                 }
             }
             catch (ex) {
@@ -1501,35 +1501,40 @@ const crypto = __importStar(__webpack_require__(417));
 const actionParameters_1 = __webpack_require__(206);
 const AuthorizerFactory_1 = __webpack_require__(619);
 const router_1 = __webpack_require__(22);
-//import { ValidatorFactory } from './ActionInputValidator/ValidatorFactory';
-var prefix = !!process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : "";
+const prefix = process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : '';
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         let isDeploymentSuccess = true;
         try {
             // Set user agent variable
-            let usrAgentRepo = crypto.createHash('sha256').update(`${process.env.GITHUB_REPOSITORY}`).digest('hex');
-            let actionName = 'WebAppRouteTraffic';
-            let userAgentString = (!!prefix ? `${prefix}+` : '') + `GITHUBACTIONS_${actionName}_${usrAgentRepo}`;
+            const usrAgentRepo = crypto
+                .createHash('sha256')
+                .update(`${process.env.GITHUB_REPOSITORY}`)
+                .digest('hex');
+            const actionName = 'WebAppRouteTraffic';
+            const pref = prefix ? `${prefix}+` : '';
+            const userAgentString = `${pref}GITHUBACTIONS_${actionName}_${usrAgentRepo}`;
             core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
             // Initialize action inputs
-            let endpoint = yield AuthorizerFactory_1.AuthorizerFactory.getAuthorizer();
+            const endpoint = yield AuthorizerFactory_1.AuthorizerFactory.getAuthorizer();
             actionParameters_1.ActionParameters.getActionParams(endpoint);
-            var router = new router_1.Router();
+            const router = new router_1.Router();
             yield router.applyRoutingRule();
         }
         catch (error) {
             isDeploymentSuccess = false;
-            core.setFailed("Route traffic failed with error: " + error);
+            core.setFailed(`Route traffic failed with error: ${error}`);
         }
         finally {
             // Reset AZURE_HTTP_USER_AGENT
             core.exportVariable('AZURE_HTTP_USER_AGENT', prefix);
-            core.debug(isDeploymentSuccess ? "Route traffic succeeded" : "Route traffic failed");
+            core.debug(isDeploymentSuccess ? 'Route traffic succeeded' : 'Route traffic failed');
         }
     });
 }
+exports.main = main;
 main();
+exports.default = main;
 
 
 /***/ }),
@@ -1551,14 +1556,16 @@ const core = __importStar(__webpack_require__(470));
 class ActionParameters {
     constructor(endpoint) {
         this._endpoint = endpoint;
-        this._resourceGroupName = core.getInput('resource-group', { required: true });
+        this._resourceGroupName = core.getInput('resource-group', {
+            required: true
+        });
         this._appName = core.getInput('app-name', { required: true });
         this._slotName = core.getInput('slot-name', { required: true });
-        this._trafficPercentage = parseFloat(core.getInput('traffic-percentage', { required: true }));
+        this._trafficPercentage = parseFloat(core.getInput('percentage-traffic', { required: true }));
     }
     static getActionParams(endpoint) {
         if (!this.actionparams) {
-            this.actionparams = new ActionParameters(!!endpoint ? endpoint : undefined);
+            this.actionparams = new ActionParameters(endpoint ? endpoint : undefined);
         }
         return this.actionparams;
     }

@@ -18,7 +18,7 @@ export class ActionParameters {
     this._appName = core.getInput('app-name', { required: true });
     this._slotName = core.getInput('slot-name', { required: true });
     this._trafficPercentage = parseFloat(
-      core.getInput('traffic-percentage', { required: true })
+      core.getInput('percentage-traffic', { required: true })
     );
   }
 

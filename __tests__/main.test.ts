@@ -6,14 +6,13 @@ import main from '../src/main';
 describe('action test suite', () => {
   beforeAll(async () => {
     jest.spyOn(AuthorizerFactory, 'getAuthorizer').mockResolvedValue({
-        getToken: (force) => Promise.resolve('BearerToken'),
-        subscriptionID: 'SubscriptionId',
-        baseUrl: 'http://baseUrl/',
-        getCloudEndpointUrl: (name) => '',
-        getCloudSuffixUrl: (suffixName) => '.database.windows.net'
+      getToken: force => Promise.resolve('BearerToken'),
+      subscriptionID: 'SubscriptionId',
+      baseUrl: 'http://baseUrl/',
+      getCloudEndpointUrl: name => '',
+      getCloudSuffixUrl: suffixName => '.database.windows.net'
     });
   });
-
 
   it('should route traffic', async () => {
     // set inputs
@@ -22,7 +21,7 @@ describe('action test suite', () => {
     process.env['INPUT_RESOURCE-GROUP'] = 'rg-test';
     process.env['INPUT_APP-NAME'] = 'webapp';
     process.env['INPUT_SLOT-NAME'] = 'staging';
-    process.env['INPUT_TRAFFIC-PERCENTAGE'] = '20';
+    process.env['INPUT_PERCENTAGE-TRAFFIC'] = '20';
 
     // mock the rest api calls
     const responseBody = {
@@ -30,8 +29,8 @@ describe('action test suite', () => {
         experiments: {
           rampUpRules: [
             {
-              name: "blue",
-              actionHostName: "myapp-slot.azurewebsites.net",
+              name: 'blue',
+              actionHostName: 'myapp-slot.azurewebsites.net',
               reroutePercentage: 22.345
             }
           ]
@@ -41,9 +40,11 @@ describe('action test suite', () => {
     nock('http://baseUrl')
       .persist()
       .defaultReplyHeaders({
-        'Content-Type': 'application/json',
-       })
-      .post('/subscriptions/SubscriptionId/resourceGroups/rg-test/providers/Microsoft.Web/sites/webapp/config/web?api-version=2016-08-01')
+        'Content-Type': 'application/json'
+      })
+      .post(
+        '/subscriptions/SubscriptionId/resourceGroups/rg-test/providers/Microsoft.Web/sites/webapp/config/web?api-version=2016-08-01'
+      )
       .reply(200, responseBody);
 
     // run the task

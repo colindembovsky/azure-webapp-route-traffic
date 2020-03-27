@@ -7,7 +7,9 @@ import { AuthorizerFactory } from 'azure-actions-webclient/AuthorizerFactory';
 import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 import { Router } from './router';
 
-const prefix = process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : '';
+const prefix = process.env.AZURE_HTTP_USER_AGENT
+  ? `${process.env.AZURE_HTTP_USER_AGENT}`
+  : '';
 
 export async function main(): Promise<void> {
   let isDeploymentSuccess = true;
