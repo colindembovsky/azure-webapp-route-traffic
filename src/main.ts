@@ -25,11 +25,11 @@ export async function main(): Promise<void> {
     core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
 
     // Initialize action inputs
-    core.debug("------------------------- getting authorizer");
+    core.info("------------------------- getting authorizer");
     const endpoint = await AuthorizerFactory.getAuthorizer();
-    core.debug("------------------------- after getAuthorizer");
-    core.debug(endpoint.baseUrl);
-    core.debug("------------------------- baseUrl");
+    core.info("------------------------- after getAuthorizer");
+    core.info(endpoint.baseUrl);
+    core.info("------------------------- baseUrl");
     const actionParams = ActionParameters.getActionParams(endpoint);
 
     const router = new Router(actionParams);

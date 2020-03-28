@@ -1139,6 +1139,7 @@ class AzureCLIAuthorizer {
                 }
                 catch (error) {
                     console.log('Failed to fetch Azure access token');
+                    console.log(error);
                     throw error;
                 }
             }
