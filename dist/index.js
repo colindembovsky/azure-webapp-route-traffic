@@ -998,18 +998,16 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
-const actionParameters_1 = __webpack_require__(206);
 const AzureRestClient_1 = __webpack_require__(474);
 const azureApiVersion = 'api-version=2016-08-01';
 class Router {
-    constructor() {
-        this.actionParams = actionParameters_1.ActionParameters.getActionParams();
+    constructor(actionParams) {
+        this.actionParams = actionParams;
         this.serviceClient = new AzureRestClient_1.ServiceClient(this.actionParams.endpoint);
     }
     getHeaders() {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const accessToken = yield ((_a = this.actionParams.endpoint) === null || _a === void 0 ? void 0 : _a.getToken());
+            const accessToken = yield this.actionParams.endpoint.getToken();
             core.debug('Successfully got token');
             return {
                 authorization: `Bearer ${accessToken}`,
@@ -1501,7 +1499,9 @@ const crypto = __importStar(__webpack_require__(417));
 const actionParameters_1 = __webpack_require__(206);
 const AuthorizerFactory_1 = __webpack_require__(619);
 const router_1 = __webpack_require__(22);
-const prefix = process.env.AZURE_HTTP_USER_AGENT ? `${process.env.AZURE_HTTP_USER_AGENT}` : '';
+const prefix = process.env.AZURE_HTTP_USER_AGENT
+    ? `${process.env.AZURE_HTTP_USER_AGENT}`
+    : '';
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         let isDeploymentSuccess = true;
@@ -1517,8 +1517,8 @@ function main() {
             core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
             // Initialize action inputs
             const endpoint = yield AuthorizerFactory_1.AuthorizerFactory.getAuthorizer();
-            actionParameters_1.ActionParameters.getActionParams(endpoint);
-            const router = new router_1.Router();
+            const actionParams = actionParameters_1.ActionParameters.getActionParams(endpoint);
+            const router = new router_1.Router(actionParams);
             yield router.applyRoutingRule();
         }
         catch (error) {
@@ -1533,7 +1533,13 @@ function main() {
     });
 }
 exports.main = main;
-main();
+core.debug(process.env.TESTACTIONJEST);
+if (process.env.TESTACTIONJEST && process.env.TESTACTIONJEST === "testing") {
+    core.debug("=== SKIPPING AMBIENT INVOCATION FOR TESTING PURPOSES");
+}
+else {
+    main();
+}
 exports.default = main;
 
 
@@ -1565,7 +1571,7 @@ class ActionParameters {
     }
     static getActionParams(endpoint) {
         if (!this.actionparams) {
-            this.actionparams = new ActionParameters(endpoint ? endpoint : undefined);
+            this.actionparams = new ActionParameters(endpoint);
         }
         return this.actionparams;
     }
