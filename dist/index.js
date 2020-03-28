@@ -1052,7 +1052,7 @@ class Router {
                 const res = yield this.serviceClient.beginRequest(request);
                 if (res.statusCode === 200) {
                     try {
-                        const retConfig = JSON.parse(res.body);
+                        const retConfig = res.body;
                         const exp = retConfig.properties.experiments.rampUpRules[0];
                         core.debug(`Call success: ${JSON.stringify(exp)}`);
                     }

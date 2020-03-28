@@ -42,7 +42,7 @@ describe('action test suite', () => {
       .defaultReplyHeaders({
         'Content-Type': 'application/json'
       })
-      .post(
+      .put(
         '/subscriptions/SubscriptionId/resourceGroups/rg-test/providers/Microsoft.Web/sites/webapp/config/web?api-version=2016-08-01'
       )
       .reply(200, responseBody);
