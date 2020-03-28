@@ -1528,7 +1528,7 @@ function main() {
         }
         catch (error) {
             isDeploymentSuccess = false;
-            core.setFailed(`Route traffic failed with error: ${error}`);
+            core.setFailed(`Route traffic failed`);
         }
         finally {
             // Reset AZURE_HTTP_USER_AGENT

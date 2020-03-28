@@ -25,18 +25,14 @@ export async function main(): Promise<void> {
     core.exportVariable('AZURE_HTTP_USER_AGENT', userAgentString);
 
     // Initialize action inputs
-    core.info("------------------------- getting authorizer");
     const endpoint = await AuthorizerFactory.getAuthorizer();
-    core.info("------------------------- after getAuthorizer");
-    core.info(endpoint.baseUrl);
-    core.info("------------------------- baseUrl");
     const actionParams = ActionParameters.getActionParams(endpoint);
 
     const router = new Router(actionParams);
     await router.applyRoutingRule();
   } catch (error) {
     isDeploymentSuccess = false;
-    core.setFailed(`Route traffic failed with error: ${error}`);
+    core.setFailed(`Route traffic failed`);
   } finally {
     // Reset AZURE_HTTP_USER_AGENT
     core.exportVariable('AZURE_HTTP_USER_AGENT', prefix);
