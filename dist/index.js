@@ -1134,9 +1134,11 @@ class AzureCLIAuthorizer {
             if (!this._token || force) {
                 try {
                     let azAccessToken = JSON.parse(yield AzureCLIAuthorizer.executeAzCliCommand('account get-access-token', !!args ? args : []));
-                    console.log("------------------------ACCESS TOKEN!!!!");
-                    console.log(azAccessToken);
-                    core.setSecret(azAccessToken);
+                    try {
+                        core.setSecret(azAccessToken);
+                    } catch(error){
+                        // do nothing
+                    }
                     this._token = azAccessToken['accessToken'];
                 }
                 catch (error) {
@@ -1745,8 +1747,7 @@ class Command {
     }
 }
 function escapeData(s) {
-    if (!s) return '';
-    return s
+    return (s || '')
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
         .replace(/\n/g, '%0A');
