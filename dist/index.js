@@ -1745,6 +1745,8 @@ class Command {
     }
 }
 function escapeData(s) {
+    console.log("-------------------- ESCAPE DATA: s is:");
+    console.log(s);
     return (s || '')
         .replace(/%/g, '%25')
         .replace(/\r/g, '%0D')
