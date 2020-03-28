@@ -1037,7 +1037,7 @@ class Router {
             const configDataStr = JSON.stringify(configData);
             core.debug(`ConfigData = ${configDataStr}`);
             return {
-                method: 'post',
+                method: 'put',
                 uri: configUrl,
                 headers,
                 body: configDataStr

@@ -47,7 +47,7 @@ export class Router {
     core.debug(`ConfigData = ${configDataStr}`);
 
     return {
-      method: 'post',
+      method: 'put',
       uri: configUrl,
       headers,
       body: configDataStr
