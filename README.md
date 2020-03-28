@@ -1,101 +1,67 @@
 <p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
+  <a href="https://github.com/colindembovsky/azure-webapp-route-traffic"><img alt="action status" src="https://github.com/colindembovsky/azure-webapp-route-traffic/workflows/build-test/badge.svg"></a>
 </p>
 
-# Create a JavaScript Action using TypeScript
+# Traffic Manager: Route a Percentage of Traffic to an Azure Web App Slot
 
-Use this template to bootstrap the creation of a JavaScript action.:rocket:
+Use this action to configure traffic manager on an Azure Web App to direct a percentage of traffic to a slot.
 
-This template includes compilication support, tests, a validation workflow, publishing, and versioning guidance.  
+## Usage
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
-
-## Create an action from this template
-
-Click the `Use this Template` and provide the new repo details for your action
-
-## Code in Master
-
-Install the dependencies  
-```bash
-$ npm install
+```yml
+    # add a login action
+    - name: 'Login via Azure CLI'
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    # now you can route traffic
+    - name: 'Route traffic'
+      uses: colindembovsky/azure-webapp-route-traffic@v1.0.0
+      with: 
+        resource-group: rg-containing-web-app
+        app-name: web-app-name
+        slot-name: slot-name
+        percentage-traffic: 21 # percentage of traffic to route to slot
 ```
 
-Build the typescript and package it for distribution
+> Note: To set up the credentials for the `az login` action, refer to [this repo](https://github.com/marketplace/actions/azure-login).
+
+## Developing
+
 ```bash
-$ npm run build && npm run pack
+yarn install
+yarn run build  # builds the typescript
+yarn lint       # runs linting
+yarn test       # runs the unit test
+yarn run pack   # creates the bundle (the run keywork is important)
 ```
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+### Bug in AuthorizerFactory
+For some reason, the `azure-actions-webclient/AuthorizerFactory` breaks when it tries to set the access token as a secret in the logs.
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
-
-...
-```
-
-## Change action.yml
-
-The action.yml contains defines the inputs and output for your action.
-
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
+To work around this, replace the `getToken` method in the `dist/index.js` file after running `yarn run pack`:
+```ts
+getToken(force, args) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!this._token || force) {
+            try {
+                let azAccessToken = JSON.parse(yield AzureCLIAuthorizer.executeAzCliCommand('account get-access-token', !!args ? args : []));
+                // this try/catch is a hack to fix the error
+                try {
+                    core.setSecret(azAccessToken);
+                } catch(error){
+                    // do nothing
+                }
+                this._token = azAccessToken['accessToken'];
+            }
+            catch (error) {
+                console.log('Failed to fetch Azure access token');
+                console.log(error);
+                throw error;
+            }
+        }
+        return this._token;
+    });
 }
-
-run()
 ```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run pack
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml)])
-
-```yaml
-uses: ./
-with:
-  milliseconds: 1000
-```
-
-See the [actions tab](https://github.com/actions/javascript-action/actions) for runs of this action! :rocket:
-
-## Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action

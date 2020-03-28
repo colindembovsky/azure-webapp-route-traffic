@@ -1,6 +1,6 @@
 {
   "name": "azure-webapp-route-traffic",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Route traffic to a slot on an Azure Web App",
   "main": "lib/main.js",
