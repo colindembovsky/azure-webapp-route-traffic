@@ -26,9 +26,9 @@ export async function main(): Promise<void> {
 
     // Initialize action inputs
     const endpoint = await AuthorizerFactory.getAuthorizer();
-    ActionParameters.getActionParams(endpoint);
+    const actionParams = ActionParameters.getActionParams(endpoint);
 
-    const router = new Router();
+    const router = new Router(actionParams);
     await router.applyRoutingRule();
   } catch (error) {
     isDeploymentSuccess = false;

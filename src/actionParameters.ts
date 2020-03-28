@@ -4,13 +4,13 @@ import { IAuthorizer } from 'azure-actions-webclient/Authorizer/IAuthorizer';
 
 export class ActionParameters {
   private static actionparams: ActionParameters;
-  private _endpoint?: IAuthorizer;
+  private _endpoint: IAuthorizer;
   private _resourceGroupName: string;
   private _appName: string;
   private _slotName: string;
   private _trafficPercentage: number;
 
-  private constructor(endpoint: IAuthorizer | undefined) {
+  private constructor(endpoint: IAuthorizer) {
     this._endpoint = endpoint;
     this._resourceGroupName = core.getInput('resource-group', {
       required: true
@@ -22,14 +22,14 @@ export class ActionParameters {
     );
   }
 
-  static getActionParams(endpoint?: IAuthorizer): ActionParameters {
+  static getActionParams(endpoint: IAuthorizer): ActionParameters {
     if (!this.actionparams) {
-      this.actionparams = new ActionParameters(endpoint ? endpoint : undefined);
+      this.actionparams = new ActionParameters(endpoint);
     }
     return this.actionparams;
   }
 
-  get endpoint(): IAuthorizer | undefined {
+  get endpoint(): IAuthorizer {
     return this._endpoint;
   }
 

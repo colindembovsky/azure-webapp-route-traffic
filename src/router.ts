@@ -10,13 +10,13 @@ export class Router {
   private actionParams: ActionParameters;
   private serviceClient: ServiceClient;
 
-  constructor() {
-    this.actionParams = ActionParameters.getActionParams();
-    this.serviceClient = new ServiceClient(this.actionParams.endpoint!);
+  constructor(actionParams: ActionParameters) {
+    this.actionParams = actionParams;
+    this.serviceClient = new ServiceClient(this.actionParams.endpoint);
   }
 
   private async getHeaders(): Promise<{}> {
-    const accessToken = await this.actionParams.endpoint?.getToken();
+    const accessToken = await this.actionParams.endpoint.getToken();
     core.debug('Successfully got token');
 
     return {
