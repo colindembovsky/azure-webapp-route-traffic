@@ -1134,6 +1134,8 @@ class AzureCLIAuthorizer {
             if (!this._token || force) {
                 try {
                     let azAccessToken = JSON.parse(yield AzureCLIAuthorizer.executeAzCliCommand('account get-access-token', !!args ? args : []));
+                    console.log("------------------------ACCESS TOKEN!!!!");
+                    console.log(azAccessToken);
                     core.setSecret(azAccessToken);
                     this._token = azAccessToken['accessToken'];
                 }
