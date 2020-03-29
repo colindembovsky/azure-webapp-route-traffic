@@ -17,7 +17,7 @@ Use this action to configure traffic manager on an Azure Web App to direct a per
     
     # now you can route traffic
     - name: 'Route traffic'
-      uses: colindembovsky/azure-webapp-route-traffic@v1.0.0
+      uses: colindembovsky/azure-webapp-route-traffic@v1.0.1
       with: 
         resource-group: rg-containing-web-app
         app-name: web-app-name
