@@ -1,6 +1,6 @@
 name: 'GitHub Action - Azure Web App Route Traffic to Slot'
 description: 'Route a percentage of traffic to an Azure Web App Slot'
-author: 'Colin's ALM Corner (Colin Dembovsky)'
+author: 'Colin Dembovsky'
 inputs:
   resource-group:
     description: 'Name of the resource group containing the web app'
