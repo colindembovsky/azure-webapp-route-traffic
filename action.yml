@@ -14,6 +14,9 @@ inputs:
   percentage-traffic:
     description: 'Percentage of traffic to route to slot'
     required: true
+branding:
+  icon: 'cloud'
+  color: 'blue'
 runs:
   using: 'node12'
   main: 'dist/index.js'
