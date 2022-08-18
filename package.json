@@ -26,7 +26,7 @@
   "author": "Colin Dembovsky",
   "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.2.0",
+    "@actions/core": "^1.9.1",
     "azure-actions-webclient": "^1.0.11"
   },
   "devDependencies": {
